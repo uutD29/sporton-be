@@ -9,7 +9,7 @@ export const createProduct = async (
     const productData = req.body;
 
     if (req.file) {
-      productData.imageUrl = req.file.path;
+      productData.imageUrl = `/uploads/${req.file.filename}`;
     }
 
     if (productData.categoryId) {
@@ -61,18 +61,27 @@ export const updateProduct = async (
 ): Promise<void> => {
   try {
     const productData = req.body;
+
     if (req.file) {
-      productData.imageUrl = req.file.path;
+      productData.imageUrl = `/uploads/${req.file.filename}`;
     }
+
+    if (productData.categoryId) {
+      productData.category = productData.categoryId;
+      delete productData.categoryId;
+    }
+
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       productData,
       { new: true },
     );
+
     if (!product) {
       res.status(400).json({ message: "Product not found" });
       return;
     }
+
     res.status(200).json(product);
   } catch (error) {
     res.status(500).json({ message: "Error updating product", error });
